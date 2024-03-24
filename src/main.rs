@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 
-use wofi_power_menu::{run, Menu, Wofi};
+use wofi_power_menu::{cmd::run, wofi::{Menu, Wofi}};
 
 fn main() -> anyhow::Result<()> {
     let menu = Menu::default();
@@ -23,16 +23,13 @@ fn main() -> anyhow::Result<()> {
             return Ok(());
         }
 
-        println!("Response: {}", response);
         let option = confirmation
             .nth(response.parse::<usize>()?)
             .ok_or(anyhow!(format!("Invalid response: {}", selection)))?;
-        String::from(option.cmd.clone())
+        option.cmd.to_owned()
     } else {
-        item_selected.cmd.clone()
+        item_selected.cmd.to_owned()
     };
-
-    println!("About to execute: '{}'", cmd);
 
     run(cmd)?;
 
