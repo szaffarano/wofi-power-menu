@@ -1,0 +1,24 @@
+[package]
+name = "wofi-power-menu"
+version = "0.1.0"
+edition = "2021"
+authors = ["Sebastián Zaffarano sebas@zaffarano.com.ar"]
+license = "MIT"
+description = "Shows a highly configurable power menu using wofi"
+readme = "README.md"
+homepage = "https://github.com/szaffarano/wofi_power_menu"
+repository = "https://github.com/szaffarano/wofi_power_menu"
+keywords = ["cli", "wayland", "wofi"]
+categories = ["command-line-utilities"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.81"
+clap = { version = "4.5.3", features = ["derive", "env"] }
+serde = { version = "1.0.197", features = ["derive"] }
+
+[dev-dependencies]
+assert_cmd = "2.0.14"
+assert_fs = "1.1.1"
+predicates = "3.1.0"
