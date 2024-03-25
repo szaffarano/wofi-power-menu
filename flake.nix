@@ -35,6 +35,7 @@
             cargo-outdated
             cargo-udeps
             cargo-watch
+            clippy
             rust-analyzer
             curl
             git
