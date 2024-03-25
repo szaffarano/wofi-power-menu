@@ -2,16 +2,17 @@ use anyhow::{anyhow, bail, Result};
 use std::{
     io::{self, Write},
     process::Stdio,
-    thread,
 };
 
-const LOCK_SCREEN: char = '\u{f033e}';
-const LOGOUT: char = '\u{f0343}';
-const SUSPEND: char = '\u{f04b2}';
-const HIBERNATE: char = '\u{f02ca}';
-const REBOOT: char = '\u{f0709}';
-const SHUTDOWN: char = '\u{f0425}';
-const CANCEL: char = '\u{f0156}';
+const LOCK_SCREEN: char = '\u{f033e}'; // 󰌾
+const LOGOUT: char = '\u{f0343}'; // 󰍃
+const SUSPEND: char = '\u{f04b2}'; // 󰒲
+const HIBERNATE: char = '\u{f02ca}'; // 󰋊
+const REBOOT: char = '\u{f0709}'; // 󰜉
+const SHUTDOWN: char = '\u{f0425}'; // 󰐥
+const CANCEL: char = '\u{f0156}'; // 󰅖
+
+// https://www.w3.org/International/questions/qa-bidi-unicode-controls
 const LRM: char = '\u{200e}';
 const FSI: char = '\u{2068}';
 const PDI: char = '\u{2069}';
@@ -111,7 +112,7 @@ pub struct Wofi {
 impl Default for Wofi {
     fn default() -> Self {
         Wofi {
-            path: String::from("/home/sebas/.nix-profile/bin/wofi"),
+            path: String::from("wofi"),
             args: vec![
                 String::from("-S"),
                 String::from("dmenu"),
@@ -140,14 +141,11 @@ impl Wofi {
             .stdout(Stdio::piped())
             .spawn()?;
 
-        let mut stdin = child.stdin.take().ok_or(anyhow!("failed to get stdin"))?;
-
-        let menu_content = menu.render();
-        thread::spawn(move || {
-            stdin
-                .write_all(menu_content.as_bytes())
-                .expect("Failed to write to stdin");
-        });
+        child
+            .stdin
+            .as_mut()
+            .ok_or(anyhow!("failed to get stdin"))?
+            .write_all(menu.render().as_bytes())?;
 
         let out = child.wait_with_output()?;
 
