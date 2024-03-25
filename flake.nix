@@ -1,6 +1,4 @@
 {
-  description = "Highly configurable power menu using the wofi launcher ";
-
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
     flake-utils = {
@@ -14,12 +12,20 @@
       with nixpkgs.legacyPackages.${system}; {
         packages = {
           wofi-power-menu = rustPlatform.buildRustPackage {
-            name = "wofi-power-menu";
+            pname = "wofi-power-menu";
             version = "0.1.0";
+
+            src = lib.cleanSource ./.;
             cargoLock = {
               lockFile = ./Cargo.lock;
             };
-            src = lib.cleanSource ./.;
+
+            meta = with lib; {
+              description = "Highly configurable power menu using the wofi launcher ";
+              homepage = "https://github.com/szaffarano/wofi-power-menu";
+              license = licenses.mit;
+              maintainers = [ ];
+            };
           };
         };
 
@@ -40,7 +46,6 @@
             curl
             git
             jq
-            nixpkgs-fmt
           ];
 
           env = {
