@@ -159,7 +159,7 @@ impl Wofi {
 
         let selection = String::from_utf8_lossy(&out.stdout);
         Ok(selection
-            .strip_suffix("\n")
+            .strip_suffix('\n')
             .unwrap_or(&selection)
             .to_string())
     }

@@ -17,7 +17,7 @@ fn main() -> anyhow::Result<()> {
         .ok_or(anyhow!(format!("Invalid selection: {}", selection)))?;
 
     let cmd = if item_selected.requires_confirmation {
-        let confirmation = Menu::new_confirmation(&item_selected);
+        let confirmation = Menu::new_confirmation(item_selected);
         let response = wofi.spawn(&confirmation)?;
         if response.is_empty() {
             return Ok(());
