@@ -1,7 +1,7 @@
 # Wofi power menu
 
 ![GitHub Release](https://img.shields.io/github/v/release/szaffarano/wofi-power-menu?sort=date)
-![GitHub License](https://img.shields.io/github/license/:user/:repo)
+![GitHub License](https://img.shields.io/github/license/szaffarano/wofi-power-menu)
 ![CI](https://github.com/szaffarano/wofi-power-menu/actions/workflows/ci.yml/badge.svg)
 ![Release](https://github.com/szaffarano/wofi-power-menu/actions/workflows/release.yml/badge.svg)
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
