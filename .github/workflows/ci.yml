@@ -1,0 +1,128 @@
+name: CI pipeline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "master"
+    tags-ignore:
+      - "*"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  cancel_previous:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.12.1
+        with:
+          access_token: ${{ github.token }}
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust Toolchain
+        id: rust_toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-features-${{ matrix.features }}-git-${{ github.sha }}
+          restore-keys: |
+            lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-features-${{ matrix.features }}-
+            lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
+            lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
+            lint-${{ runner.os }}-
+      - name: rustfmt
+        shell: bash
+        run: |
+          cargo fmt -- --check
+      - name: Clippy
+        shell: bash
+        run: |
+          cargo clippy --features=${{ matrix.features }} --locked --tests -- -D warnings
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust Toolchain
+        id: rust_toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-git-${{ github.sha }}
+          restore-keys: |
+            test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
+            test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
+            test-${{ runner.os }}-
+      - name: Test
+        shell: bash
+        run: |
+          cargo test --release
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust Toolchain
+        id: rust_toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
+            build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
+            build-${{ runner.os }}-
+      - name: "Build"
+        shell: bash
+        run: |
+          cargo build --release
+      - name: Determine artifact name suffix
+        id: artifact_suffix
+        if: "matrix.features == 'default' || matrix.features == 'all'"
+        shell: bash
+        run: |
+          case "${{ matrix.features }}" in
+            default)
+              printf 'suffix=%s\n' 'minimal' >> $GITHUB_OUTPUT
+              ;;
+            all)
+              printf 'suffix=%s\n' 'full' >> $GITHUB_OUTPUT
+              ;;
+            *)
+              exit 1
+              ;;
+          esac
+      - name: Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          retention-days: 30
+          path: |
+            target/release/wofi-power-menu

@@ -261,7 +261,6 @@ impl Wofi {
     pub fn args(&self) -> String {
         self.args.to_string()
     }
-
 }
 
 pub fn get_config(file_name: impl Into<String>) -> anyhow::Result<Option<Config>> {
