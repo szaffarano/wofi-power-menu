@@ -34,12 +34,14 @@ jobs:
           echo "Tag deleted!"
           if [[ "$GITHUB_REF_NAME" == *"-"* ]]; then
             echo "Calculate last tag using $GITHUB_REF_NAME"
-            git tag -l --sort version:refname | tail -n1
+            git tag -l --sort version:refname
             last_tag="$(git tag -l --sort version:refname | tail -n1)"
+            echo "Last tag: $last_tag"
           else
             echo "Calculate last tag"
-            git tag -l --sort version:refname | grep -v -- - | tail -n1
+            git tag -l --sort version:refname
             last_tag="$(git tag -l --sort version:refname | grep -v -- - | tail -n1)"
+            echo "Last tag: $last_tag"
           fi
           echo "Running..."
           printf 'Using %s as last tag\n' "$last_tag"
