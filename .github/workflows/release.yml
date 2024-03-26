@@ -22,6 +22,23 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      - name: Conventional Commit Changelog
+        id: conventional_commits
+        shell: bash
+        run: |
+          curl -Ls https://github.com/clog-tool/clog-cli/releases/download/v0.9.3/clog-v0.9.3-x86_64-unknown-linux-musl.tar.gz | tar xfz -
+          chmod +x ./clog
+          # delete current tag locally
+          git tag -d "$GITHUB_REF_NAME"
+          if [[ "$GITHUB_REF_NAME" == *"-"* ]]; then
+            last_tag="$(git tag -l --sort version:refname | tail -n1)"
+          else
+            last_tag="$(git tag -l --sort version:refname | grep -v -- - | tail -n1)"
+          fi
+          printf 'Using %s as last tag\n' "$last_tag"
+          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
+          ./clog --from="$last_tag" --setversion="$GITHUB_REF_NAME" >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
