@@ -1,3 +1,9 @@
+![GitHub Release](https://img.shields.io/github/v/release/szaffarano/wofi-power-menu?sort=date)
+![GitHub License](https://img.shields.io/github/license/:user/:repo)
+![CI](https://github.com/szaffarano/wofi-power-menu/actions/workflows/ci.yml/badge.svg)
+![Release](https://github.com/szaffarano/wofi-power-menu/actions/workflows/release.yml/badge.svg)
+
+
 # Wofi power menu
 
 ## Configuration
