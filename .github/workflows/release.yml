@@ -4,7 +4,6 @@ permissions:
   contents: write
 
 on:
-  pull_request:
   push:
     tags:
       - "v*"
@@ -123,7 +122,7 @@ jobs:
         shell: bash
         run: |
           zip -j "wofi-power-menu.zip" target/release/wofi-power-menu
-          echo "filename=wofi-power-menu.zip" >> $GITHUB_OUTPUT
+          echo "filename=wofi-power-menu" >> $GITHUB_OUTPUT
       - name: "Hash (Unix)"
         run: |
           echo "$(sha256sum ${{ steps.pack.outputs.filename }}.zip | cut -d ' ' -f 1)" > ${{ steps.pack.outputs.filename }}.zip.sha256sum
