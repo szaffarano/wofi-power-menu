@@ -13,7 +13,7 @@ use crate::icons::{CANCEL, FSI, LRM, PDI};
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub wofi: Option<WofiConfig>,
-    pub menu: HashMap<String, HashMap<String, String>>,
+    pub menu: Option<HashMap<String, HashMap<String, String>>>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

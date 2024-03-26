@@ -16,7 +16,10 @@ fn main() -> Result<()> {
                 wofi_config.extra_args.unwrap_or(wofi.args()),
             );
         }
-        menu.merge(config.menu)?;
+
+        if let Some(menu_config) = config.menu {
+            menu.merge(menu_config)?;
+        }
     } else {
         println!("No config file found, using default values");
     }
