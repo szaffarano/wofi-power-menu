@@ -1,10 +1,25 @@
-use anyhow::anyhow;
+use anyhow::{anyhow, Result};
 
-use wofi_power_menu::{cmd::run, power_menu, wofi::Menu};
+use wofi_power_menu::{
+    cmd, power_menu,
+    wofi::{self, Menu, Wofi},
+};
 
-fn main() -> anyhow::Result<()> {
-    let menu = power_menu::default_menu();
-    let wofi = power_menu::default_wofi();
+fn main() -> Result<()> {
+    let mut menu = power_menu::default_menu();
+    let mut wofi = power_menu::default_wofi();
+
+    if let Some(config) = wofi::get_config(env!("CARGO_BIN_NAME"))? {
+        if let Some(wofi_config) = config.wofi {
+            wofi = Wofi::new(
+                wofi_config.path.unwrap_or(wofi.path()),
+                wofi_config.extra_args.unwrap_or(wofi.args()),
+            );
+        }
+        menu.merge(config.menu)?;
+    } else {
+        println!("No config file found, using default values");
+    }
 
     let selection = wofi.spawn(&menu)?;
 
@@ -16,7 +31,7 @@ fn main() -> anyhow::Result<()> {
         .nth(selection.parse::<usize>()?)
         .ok_or(anyhow!(format!("Invalid selection: {}", selection)))?;
 
-    let cmd = if item_selected.requires_confirmation {
+    let cmd = if item_selected.requires_confirmation() {
         let confirmation = Menu::new_confirmation(item_selected);
         let response = wofi.spawn(&confirmation)?;
         if response.is_empty() {
@@ -26,12 +41,12 @@ fn main() -> anyhow::Result<()> {
         let option = confirmation
             .nth(response.parse::<usize>()?)
             .ok_or(anyhow!(format!("Invalid response: {}", selection)))?;
-        option.cmd.to_owned()
+        option.cmd()
     } else {
-        item_selected.cmd.to_owned()
+        item_selected.cmd()
     };
 
-    run(cmd)?;
+    cmd::run(cmd)?;
 
     Ok(())
 }
