@@ -10,4 +10,3 @@ pub const CANCEL: char = '\u{f0156}'; // 󰅖
 pub const LRM: char = '\u{200e}';
 pub const FSI: char = '\u{2068}';
 pub const PDI: char = '\u{2069}';
-
