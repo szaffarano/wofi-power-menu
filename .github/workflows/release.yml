@@ -1,5 +1,8 @@
 name: Release pipeline
 
+permissions:
+  contents: write
+
 on:
   pull_request:
   push:
