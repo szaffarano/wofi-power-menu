@@ -1,10 +1,10 @@
 use anyhow::anyhow;
 
-use wofi_power_menu::{cmd::run, wofi::{Menu, Wofi}};
+use wofi_power_menu::{cmd::run, power_menu, wofi::Menu};
 
 fn main() -> anyhow::Result<()> {
-    let menu = Menu::default();
-    let wofi = Wofi::default();
+    let menu = power_menu::default_menu();
+    let wofi = power_menu::default_wofi();
 
     let selection = wofi.spawn(&menu)?;
 

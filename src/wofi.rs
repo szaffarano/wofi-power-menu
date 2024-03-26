@@ -4,18 +4,7 @@ use std::{
     process::Stdio,
 };
 
-const LOCK_SCREEN: char = '\u{f033e}'; // 󰌾
-const LOGOUT: char = '\u{f0343}'; // 󰍃
-const SUSPEND: char = '\u{f04b2}'; // 󰒲
-const HIBERNATE: char = '\u{f02ca}'; // 󰋊
-const REBOOT: char = '\u{f0709}'; // 󰜉
-const SHUTDOWN: char = '\u{f0425}'; // 󰐥
-const CANCEL: char = '\u{f0156}'; // 󰅖
-
-// https://www.w3.org/International/questions/qa-bidi-unicode-controls
-const LRM: char = '\u{200e}';
-const FSI: char = '\u{2068}';
-const PDI: char = '\u{2069}';
+use crate::icons::{CANCEL, FSI, LRM, PDI};
 
 pub struct Menu {
     title: String,
@@ -27,22 +16,6 @@ pub struct Item {
     icon: char,
     pub cmd: String,
     pub requires_confirmation: bool,
-}
-
-impl Default for Menu {
-    fn default() -> Self {
-        Menu {
-            title: String::from("Power menu"),
-            items: vec![
-                Item::new("Shut down", SHUTDOWN, "systemctl poweroff", true),
-                Item::new("Reboot", REBOOT, "systemctl reboot", true),
-                Item::new("Suspend", SUSPEND, "systemctl suspend", true),
-                Item::new("Hibernate", HIBERNATE, "systemctl hibernate", false),
-                Item::new("Logout", LOGOUT, "loginctl terminate-session", false),
-                Item::new("Lock screen", LOCK_SCREEN, "loginctl lock-session", false),
-            ],
-        }
-    }
 }
 
 impl Menu {
@@ -79,10 +52,14 @@ impl Menu {
     pub fn nth(&self, n: usize) -> Option<&Item> {
         self.items.get(n)
     }
+
+    pub fn size(&self) -> usize {
+        self.items.len()
+    }
 }
 
 impl Item {
-    fn new(
+    pub fn new(
         title: impl Into<String>,
         icon: char,
         cmd: impl Into<String>,
@@ -106,37 +83,28 @@ impl Item {
 
 pub struct Wofi {
     path: String,
-    args: Vec<String>,
-}
-
-impl Default for Wofi {
-    fn default() -> Self {
-        Wofi {
-            path: String::from("wofi"),
-            args: vec![
-                String::from("-S"),
-                String::from("dmenu"),
-                String::from("-m"),
-                String::from("-i"),
-                String::from("-Ddmenu-print_line_num=true"),
-                String::from("-w"),
-                String::from("1"),
-                String::from("-L"),
-                String::from("8"),
-                String::from("-b"),
-            ],
-        }
-    }
+    args: String,
 }
 
 impl Wofi {
+    pub fn new(path: impl Into<String>, args: impl Into<String>) -> Self {
+        Wofi {
+            path: path.into(),
+            args: args.into(),
+        }
+    }
+
     pub fn spawn(&self, menu: &Menu) -> Result<String> {
-        let mut args = vec![String::from("-p"), menu.title.clone()];
-
-        args.extend(self.args.clone());
-
         let mut child = std::process::Command::new(&self.path)
-            .args(args)
+            // both prompt and lines can be overridden by self.args
+            .arg("--prompt")
+            .arg(&menu.title)
+            .arg(format!("--lines={}", menu.size() + 1))
+            // default/configured args
+            .args(self.args.split_whitespace().collect::<Vec<_>>())
+            // mandatory arguments
+            .arg("-Ddmenu-print_line_num=true")
+            .arg("--dmenu")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .spawn()?;
