@@ -3,8 +3,11 @@
 ![CI](https://github.com/szaffarano/wofi-power-menu/actions/workflows/ci.yml/badge.svg)
 ![Release](https://github.com/szaffarano/wofi-power-menu/actions/workflows/release.yml/badge.svg)
 
-
 # Wofi power menu
+
+Implements a power menu using the [wofi](https://sr.ht/~scoopta/wofi/) launcher.
+
+![wofi-power-menu](./img/wpm.png)
 
 ## Configuration
 
@@ -44,3 +47,7 @@ Also, you can customize the menue either:
 
 1. Overriding default values in any existing menu entry. The above example translates the titles to Spanish, or
 1. Adding new entries, like `ls`. Notice that the only optional field is `requires_confirmation`, you have to set `title`, `cmd` and `icon`.
+
+## Related tools
+
+Highly inspired by his cousin [rofi-power-menu](https://github.com/jluttine/rofi-power-menu).
