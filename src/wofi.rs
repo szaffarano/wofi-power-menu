@@ -1,21 +1,56 @@
-use anyhow::{anyhow, bail, Result};
+use anyhow::{anyhow, bail, Context, Result};
+use serde::{Deserialize, Serialize};
 use std::{
+    collections::HashMap,
+    fs,
     io::{self, Write},
+    path::Path,
     process::Stdio,
 };
 
 use crate::icons::{CANCEL, FSI, LRM, PDI};
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Config {
+    pub wofi: Option<WofiConfig>,
+    pub menu: Option<HashMap<String, HashMap<String, String>>>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct WofiConfig {
+    pub path: Option<String>,
+    pub extra_args: Option<String>,
+}
+
+impl Config {
+    pub fn read<T: AsRef<Path>>(path: T) -> Result<Option<Self>> {
+        let path = path.as_ref();
+
+        if fs::metadata(path).is_err() {
+            return Ok(None);
+        }
+
+        let raw = fs::read_to_string(path)?;
+
+        let config = toml::from_str(&raw)
+            .with_context(|| format!("{}: Invalid format", path.to_string_lossy()))?;
+
+        Ok(Some(config))
+    }
+}
 
 pub struct Menu {
     title: String,
     items: Vec<Item>,
 }
 
+#[derive(Debug)]
 pub struct Item {
+    id: String,
     title: String,
     icon: char,
-    pub cmd: String,
-    pub requires_confirmation: bool,
+    cmd: String,
+    requires_confirmation: bool,
 }
 
 impl Menu {
@@ -31,12 +66,13 @@ impl Menu {
             "Are you sure?",
             vec![
                 Item::new(
+                    "yes",
                     format!("Yes, {}", item.title),
                     item.icon,
                     item.cmd.to_owned(),
                     false,
                 ),
-                Item::new("No, cancel", CANCEL, String::new(), false),
+                Item::new("no", "No, cancel", CANCEL, String::new(), false),
             ],
         )
     }
@@ -53,19 +89,48 @@ impl Menu {
         self.items.get(n)
     }
 
+    pub fn item(&self, id: impl Into<String>) -> Option<&Item> {
+        let id = id.into();
+
+        self.items.iter().find(|i| i.id == id)
+    }
+
+    pub fn item_mut(&mut self, id: impl Into<String>) -> Option<&mut Item> {
+        let id = id.into();
+
+        self.items.iter_mut().find(|i| i.id == id)
+    }
+
+    pub fn add_item(&mut self, item: Item) {
+        self.items.push(item);
+    }
+
     pub fn size(&self) -> usize {
         self.items.len()
+    }
+
+    pub fn merge(&mut self, config: HashMap<String, HashMap<String, String>>) -> Result<()> {
+        for (key, value) in config {
+            if let Some(item) = self.item_mut(key.as_str()) {
+                item.merge(value)?;
+            } else {
+                self.add_item(Item::from_config(key, value)?);
+            }
+        }
+        Ok(())
     }
 }
 
 impl Item {
     pub fn new(
+        id: impl Into<String>,
         title: impl Into<String>,
         icon: char,
         cmd: impl Into<String>,
         requires_confirmation: bool,
     ) -> Self {
         Item {
+            id: id.into(),
             title: title.into(),
             icon,
             cmd: cmd.into(),
@@ -73,11 +138,68 @@ impl Item {
         }
     }
 
+    pub fn from_config(id: impl Into<String>, config: HashMap<String, String>) -> Result<Self> {
+        let id = id.into();
+        let title = config
+            .get("title")
+            .ok_or_else(|| anyhow!(format!("{}: title not found in config", id)))?
+            .to_string();
+        let cmd = config
+            .get("cmd")
+            .ok_or_else(|| anyhow!(format!("{}: cmd not found in config", id)))?
+            .to_string();
+        let icon = config
+            .get("icon")
+            .ok_or_else(|| anyhow!("failed to get stdin"))?
+            .chars()
+            .next()
+            .ok_or_else(|| anyhow!(format!("{}: unexpected empty string", id)))?;
+        let requires_confirmation = config
+            .get("requires_confirmation")
+            .unwrap_or(&String::from("false"))
+            .parse()?;
+
+        let attributes = ["title", "icon", "cmd", "requires_confirmation"];
+        config
+            .iter()
+            .filter(|(k, _)| !attributes.contains(&k.as_str()))
+            .for_each(|(k, _)| println!("[WARNING] {}: invalid property declared in '{}'", k, id));
+
+        Ok(Item {
+            id,
+            title,
+            icon,
+            cmd,
+            requires_confirmation,
+        })
+    }
+
     fn render(&self) -> String {
         let span_icon = format!(r#"<span font_size="large">{}</span>"#, self.icon);
         let span_text = format!(r#"<span font_size="large">{}</span>"#, self.title);
 
         format!("{LRM}{span_icon}  {FSI}{span_text}{PDI}")
+    }
+
+    pub fn requires_confirmation(&self) -> bool {
+        self.requires_confirmation
+    }
+
+    pub fn cmd(&self) -> String {
+        self.cmd.to_string()
+    }
+
+    pub fn merge(&mut self, other: HashMap<String, String>) -> Result<()> {
+        for (key, value) in other {
+            match key.as_str() {
+                "title" => self.title = value,
+                "icon" => self.icon = value.chars().next().ok_or(anyhow!("failed to get stdin"))?,
+                "cmd" => self.cmd = value,
+                "requieres_confirmation" => self.requires_confirmation = value.parse()?,
+                _ => bail!(format!("{}: invalid property", key)),
+            }
+        }
+        Ok(())
     }
 }
 
@@ -131,4 +253,24 @@ impl Wofi {
             .unwrap_or(&selection)
             .to_string())
     }
+
+    pub fn path(&self) -> String {
+        self.path.to_string()
+    }
+
+    pub fn args(&self) -> String {
+        self.args.to_string()
+    }
+
+}
+
+pub fn get_config(file_name: impl Into<String>) -> anyhow::Result<Option<Config>> {
+    let base_dirs =
+        directories_next::BaseDirs::new().ok_or_else(|| anyhow!("Error reading config"))?;
+
+    let path = base_dirs
+        .config_dir()
+        .join(format!("{}.toml", file_name.into()));
+
+    Config::read(path)
 }
