@@ -1,27 +1,32 @@
-use anyhow::{anyhow, Result};
+use std::process::exit;
 
+use anyhow::{anyhow, Result};
+use clap::Parser;
 use wofi_power_menu::{
-    cmd, power_menu,
-    wofi::{self, Menu, Wofi},
+    power_menu, utils,
+    wofi::{self, Menu},
 };
 
 fn main() -> Result<()> {
+    let args = power_menu::CliArgs::parse();
+
     let mut menu = power_menu::default_menu();
     let mut wofi = power_menu::default_wofi();
 
-    if let Some(config) = wofi::get_config(env!("CARGO_BIN_NAME"))? {
-        if let Some(wofi_config) = config.wofi {
-            wofi = Wofi::new(
-                wofi_config.path.unwrap_or(wofi.path()),
-                wofi_config.extra_args.unwrap_or(wofi.args()),
-            );
-        }
+    power_menu::merge_config(
+        &mut menu,
+        &mut wofi,
+        wofi::get_config(env!("CARGO_BIN_NAME"))?,
+    )?;
+    power_menu::merge_cli_args(&mut menu, &mut wofi, &args)?;
 
-        if let Some(menu_config) = config.menu {
-            menu.merge(menu_config)?;
+    if args.list_items {
+        println!("Available items:");
+        println!("----------------");
+        for item in menu.iter() {
+            println!("{}", item);
         }
-    } else {
-        println!("No config file found, using default values");
+        exit(0);
     }
 
     let selection = wofi.spawn(&menu)?;
@@ -49,7 +54,7 @@ fn main() -> Result<()> {
         item_selected.cmd()
     };
 
-    cmd::run(cmd)?;
+    utils::run(cmd)?;
 
     Ok(())
 }

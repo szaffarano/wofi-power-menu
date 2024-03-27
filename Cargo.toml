@@ -15,6 +15,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 anyhow = "1.0.81"
+clap = { version = "4.5.4", features = ["env", "derive"] }
 directories-next = "2.0.0"
 serde = { version = "1.0.197", features = ["derive"] }
 toml = "0.8.12"
