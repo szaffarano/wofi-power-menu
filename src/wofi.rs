@@ -2,6 +2,7 @@ use anyhow::{anyhow, bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
+    fmt::Display,
     fs,
     io::{self, Write},
     path::Path,
@@ -44,13 +45,14 @@ pub struct Menu {
     items: Vec<Item>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Item {
     id: String,
     title: String,
     icon: char,
     cmd: String,
     requires_confirmation: bool,
+    enabled: bool,
 }
 
 impl Menu {
@@ -80,6 +82,7 @@ impl Menu {
     pub fn render(&self) -> String {
         self.items
             .iter()
+            .filter(|i| i.enabled)
             .map(|i| i.render())
             .collect::<Vec<String>>()
             .join("\n")
@@ -106,7 +109,7 @@ impl Menu {
     }
 
     pub fn size(&self) -> usize {
-        self.items.len()
+        self.items.iter().filter(|i| i.enabled).count()
     }
 
     pub fn merge(&mut self, config: HashMap<String, HashMap<String, String>>) -> Result<()> {
@@ -118,6 +121,28 @@ impl Menu {
             }
         }
         Ok(())
+    }
+
+    pub fn iter(&self) -> MenuIterator {
+        MenuIterator {
+            curr: 0,
+            menu: self,
+        }
+    }
+}
+
+pub struct MenuIterator<'a> {
+    curr: usize,
+    menu: &'a Menu,
+}
+
+impl Iterator for MenuIterator<'_> {
+    type Item = Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.menu.nth(self.curr).cloned();
+        self.curr += 1;
+        next
     }
 }
 
@@ -135,6 +160,7 @@ impl Item {
             icon,
             cmd: cmd.into(),
             requires_confirmation,
+            enabled: true,
         }
     }
 
@@ -158,8 +184,12 @@ impl Item {
             .get("requires_confirmation")
             .unwrap_or(&String::from("false"))
             .parse()?;
+        let enabled = config
+            .get("enabled")
+            .unwrap_or(&String::from("true"))
+            .parse()?;
 
-        let attributes = ["title", "icon", "cmd", "requires_confirmation"];
+        let attributes = ["title", "icon", "cmd", "requires_confirmation", "enabled"];
         config
             .iter()
             .filter(|(k, _)| !attributes.contains(&k.as_str()))
@@ -171,6 +201,7 @@ impl Item {
             icon,
             cmd,
             requires_confirmation,
+            enabled,
         })
     }
 
@@ -185,6 +216,10 @@ impl Item {
         self.requires_confirmation
     }
 
+    pub fn set_confirmation(&mut self, confirm: bool) {
+        self.requires_confirmation = confirm;
+    }
+
     pub fn cmd(&self) -> String {
         self.cmd.to_string()
     }
@@ -195,17 +230,32 @@ impl Item {
                 "title" => self.title = value,
                 "icon" => self.icon = value.chars().next().ok_or(anyhow!("failed to get stdin"))?,
                 "cmd" => self.cmd = value,
-                "requieres_confirmation" => self.requires_confirmation = value.parse()?,
+                "requires_confirmation" => self.requires_confirmation = value.parse()?,
                 _ => bail!(format!("{}: invalid property", key)),
             }
         }
         Ok(())
+    }
+
+    pub fn disable(&mut self) {
+        self.enabled = false;
+    }
+}
+
+impl Display for Item {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}: {} [disabled: {}, confirmation: {}]",
+            self.id, self.title, !self.enabled, self.requires_confirmation
+        )
     }
 }
 
 pub struct Wofi {
     path: String,
     args: String,
+    dry_run: bool,
 }
 
 impl Wofi {
@@ -213,6 +263,7 @@ impl Wofi {
         Wofi {
             path: path.into(),
             args: args.into(),
+            dry_run: false,
         }
     }
 
@@ -260,6 +311,26 @@ impl Wofi {
 
     pub fn args(&self) -> String {
         self.args.to_string()
+    }
+
+    pub fn merge(&mut self, config: WofiConfig) -> Result<()> {
+        if let Some(path) = config.path {
+            self.path = path;
+        }
+
+        if let Some(args) = config.extra_args {
+            self.args = args;
+        }
+
+        Ok(())
+    }
+
+    pub fn update_path(&mut self, path: impl Into<String>) {
+        self.path = path.into();
+    }
+
+    pub fn dry_run(&mut self, dry_run: bool) {
+        self.dry_run = dry_run;
     }
 }
 
