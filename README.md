@@ -26,12 +26,34 @@ Usage: wofi-power-menu [OPTIONS]
 Options:
   -v, --verbose                Print additional information
   -w, --wofi-path <WOFI_PATH>  Path to the wofi binary
-  -d, --disable <DISABLE>      Comma-separated list of menu items to disable
+  -d, --disable <DISABLE>      Menu item to disable (accepts multiple values)
   -D, --dry-run                Simulate the command without executing it
-  -c, --confirm <CONFIRM>      Comma-separated list of menu items to force confirmation
+  -c, --confirm <CONFIRM>      Menu item to force confirmation
   -l, --list-items             Show the menu items and exit
   -h, --help                   Print help
   -V, --version                Print version
+```
+
+example
+
+```bash
+# list items
+./wofi-power-menu -l
+No config file found, using default values
+Available items:
+----------------
+shutdown: Shut down [disabled: false, confirmation: true]
+reboot: Reboot [disabled: false, confirmation: true]
+suspend: Suspend [disabled: false, confirmation: true]
+hibernate: Hibernate [disabled: false, confirmation: false]
+logout: Logout [disabled: false, confirmation: false]
+lock-screen: Lock screen [disabled: false, confirmation: false]
+
+# enables confirmation for lock screen and suspend
+./wofi-power-menu --confirm lock-screen --confirm reboot
+
+# "hides" hibernate
+./wofi-power-menu --disable hibernate
 ```
 
 ## Configuration File

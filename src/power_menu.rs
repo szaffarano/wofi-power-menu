@@ -18,15 +18,15 @@ pub struct CliArgs {
     #[arg(short, long)]
     wofi_path: Option<String>,
 
-    /// Comma-separated list of menu items to disable
+    /// Menu item to disable (accepts multiple values)
     #[arg(short, long)]
     disable: Vec<String>,
 
     /// Simulate the command without executing it
     #[arg(short = 'D', long, default_value = "false")]
-    dry_run: bool,
+    pub dry_run: bool,
 
-    /// Comma-separated list of menu items to force confirmation
+    /// Menu item to force confirmation (accepts multiple values)
     #[arg(short, long)]
     confirm: Vec<String>,
 
