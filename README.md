@@ -8,9 +8,33 @@
 
 Implements a power menu using the [wofi](https://sr.ht/~scoopta/wofi/) launcher.
 
+## Usage
+
+Just run the program to show the power menu:
+
 ![wofi-power-menu](./img/wpm.png)
 
-## Configuration
+## CLI configuration
+
+```bash
+$ wofi-power-menu --help
+
+Shows a highly configurable power menu using wofi
+
+Usage: wofi-power-menu [OPTIONS]
+
+Options:
+  -v, --verbose                Print additional information
+  -w, --wofi-path <WOFI_PATH>  Path to the wofi binary
+  -d, --disable <DISABLE>      Comma-separated list of menu items to disable
+  -D, --dry-run                Simulate the command without executing it
+  -c, --confirm <CONFIRM>      Comma-separated list of menu items to force confirmation
+  -l, --list-items             Show the menu items and exit
+  -h, --help                   Print help
+  -V, --version                Print version
+```
+
+## Configuration File
 
 Optionally you can create `$XDG_CONFIG_HOME/wofi-power-menu.toml` to customize
 the app:
@@ -28,6 +52,7 @@ the app:
 
 [menu.suspend]
   title = "Suspender"
+  enabled = "false"
 
 [menu.hibernate]
   title = "Hibernar"
@@ -37,6 +62,8 @@ the app:
 
 [menu.lock-screen]
     title = "Bloquear pantalla"
+    requires_confirmation = "false"
+
 
 [menu.ls]
   title = "Listar directorio"
@@ -50,7 +77,8 @@ flags to use.
 Also, you can customize the menue either:
 
 1. Overriding default values in any existing menu entry. The above example
-   translates the titles to Spanish, or
+   translates the titles to Spanish, disables the "requires_confirmation"
+   flag and and hides (i.e. set `enabled=false` the `suspend` item.
 1. Adding new entries, like `ls`. Notice that the only optional field is
    `requires_confirmation`, you have to set `title`, `cmd` and `icon`.
 
