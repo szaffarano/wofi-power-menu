@@ -230,7 +230,7 @@ impl Item {
                 "title" => self.title = value,
                 "icon" => self.icon = value.chars().next().ok_or(anyhow!("failed to get stdin"))?,
                 "cmd" => self.cmd = value,
-                "requieres_confirmation" => self.requires_confirmation = value.parse()?,
+                "requires_confirmation" => self.requires_confirmation = value.parse()?,
                 _ => bail!(format!("{}: invalid property", key)),
             }
         }
@@ -244,11 +244,11 @@ impl Item {
 
 impl Display for Item {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.enabled {
-            write!(f, "{}: {}", self.id, self.title)
-        } else {
-            write!(f, "{}: {} [DISABLED]", self.id, self.title)
-        }
+        write!(
+            f,
+            "{}: {} [disabled: {}, confirmation: {}]",
+            self.id, self.title, !self.enabled, self.requires_confirmation
+        )
     }
 }
 
