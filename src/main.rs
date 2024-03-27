@@ -54,7 +54,7 @@ fn main() -> Result<()> {
         item_selected.cmd()
     };
 
-    utils::run(cmd)?;
+    utils::run(cmd, args.dry_run)?;
 
     Ok(())
 }
