@@ -231,6 +231,7 @@ impl Item {
                 "icon" => self.icon = value.chars().next().ok_or(anyhow!("failed to get stdin"))?,
                 "cmd" => self.cmd = value,
                 "requires_confirmation" => self.requires_confirmation = value.parse()?,
+                "enabled" => self.enabled = value.parse()?,
                 _ => bail!(format!("{}: invalid property", key)),
             }
         }
