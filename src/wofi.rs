@@ -89,7 +89,12 @@ impl Menu {
     }
 
     pub fn nth(&self, n: usize) -> Option<&Item> {
-        self.items.get(n)
+        self.items
+            .iter()
+            .filter(|i| i.enabled)
+            .collect::<Vec<&Item>>()
+            .get(n)
+            .copied()
     }
 
     pub fn item(&self, id: impl Into<String>) -> Option<&Item> {
