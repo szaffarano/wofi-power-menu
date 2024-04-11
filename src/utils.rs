@@ -14,7 +14,12 @@ pub fn run(cmd: String, dry_run: bool) -> Result<()> {
         );
 
         if !dry_run {
-            Command::new(cmd_name).args(args).output()?;
+            let result = Command::new(cmd_name).args(args).output()?;
+            let stdout = String::from_utf8_lossy(&result.stdout);
+            let stderr = String::from_utf8_lossy(&result.stderr);
+            println!("{}", stdout.trim_end());
+            eprintln!("{}", stderr.trim_end());
+            std::process::exit(result.status.code().unwrap_or(1));
         }
     }
 
