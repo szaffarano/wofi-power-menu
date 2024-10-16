@@ -48,7 +48,7 @@ pub enum SessionManager {
 impl std::fmt::Display for SessionManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-            SessionManager::Elogind => "elogind",
+            SessionManager::Elogind => "loginctl",
             SessionManager::Systemd => "systemd",
         };
 
