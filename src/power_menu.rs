@@ -33,9 +33,18 @@ pub struct CliArgs {
     /// Show the menu items and exit
     #[arg(short, long)]
     pub list_items: bool,
+
+    /// Switch to elogind
+    #[arg(short, long, default_value = "false")]
+    pub elogind: Option<bool>,
 }
 
-pub fn default_menu() -> Menu {
+pub enum SessionManager {
+    Elogind,
+    Systemd,
+}
+
+pub fn default_menu(session_manager: SessionManager) -> Menu {
     Menu::new(
         String::from("Power menu"),
         vec![
@@ -43,7 +52,10 @@ pub fn default_menu() -> Menu {
                 "shutdown",
                 "Shut down",
                 icons::SHUTDOWN,
-                "systemctl poweroff",
+                match session_manager {
+                    SessionManager::Elogind => "loginctl poweroff",
+                    SessionManager::Systemd => "systemctl poweroff",
+                },
                 true,
             ),
             Item::new("reboot", "Reboot", icons::REBOOT, "systemctl reboot", true),
@@ -51,14 +63,20 @@ pub fn default_menu() -> Menu {
                 "suspend",
                 "Suspend",
                 icons::SUSPEND,
-                "systemctl suspend",
+                match session_manager {
+                    SessionManager::Elogind => "loginctl suspend",
+                    SessionManager::Systemd => "systemctl suspend",
+                },
                 true,
             ),
             Item::new(
                 "hibernate",
                 "Hibernate",
                 icons::HIBERNATE,
-                "systemctl hibernate",
+                match session_manager {
+                    SessionManager::Elogind => "loginctl hibernate",
+                    SessionManager::Systemd => "systemctl hibernate",
+                },
                 false,
             ),
             Item::new(
