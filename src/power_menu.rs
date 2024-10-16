@@ -64,7 +64,7 @@ pub fn default_menu(session_manager: SessionManager) -> Menu {
                 "shutdown",
                 "Shut down",
                 icons::SHUTDOWN,
-                format!("{session_manager} shutdown"),
+                format!("{session_manager} poweroff"),
                 true,
             ),
             Item::new("reboot", "Reboot", icons::REBOOT, "systemctl reboot", true),
