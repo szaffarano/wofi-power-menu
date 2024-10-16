@@ -39,9 +39,21 @@ pub struct CliArgs {
     pub elogind: bool,
 }
 
+// this should probably be somewhere else
 pub enum SessionManager {
     Elogind,
     Systemd,
+}
+
+impl std::fmt::Display for SessionManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            SessionManager::Elogind => "elogind",
+            SessionManager::Systemd => "systemd",
+        };
+
+        write!(f, "{string}")
+    }
 }
 
 pub fn default_menu(session_manager: SessionManager) -> Menu {
@@ -52,10 +64,7 @@ pub fn default_menu(session_manager: SessionManager) -> Menu {
                 "shutdown",
                 "Shut down",
                 icons::SHUTDOWN,
-                match session_manager {
-                    SessionManager::Elogind => "loginctl poweroff",
-                    SessionManager::Systemd => "systemctl poweroff",
-                },
+                format!("{session_manager} shutdown"),
                 true,
             ),
             Item::new("reboot", "Reboot", icons::REBOOT, "systemctl reboot", true),
@@ -63,20 +72,14 @@ pub fn default_menu(session_manager: SessionManager) -> Menu {
                 "suspend",
                 "Suspend",
                 icons::SUSPEND,
-                match session_manager {
-                    SessionManager::Elogind => "loginctl suspend",
-                    SessionManager::Systemd => "systemctl suspend",
-                },
+                format!("{session_manager} suspend"),
                 true,
             ),
             Item::new(
                 "hibernate",
                 "Hibernate",
                 icons::HIBERNATE,
-                match session_manager {
-                    SessionManager::Elogind => "loginctl hibernate",
-                    SessionManager::Systemd => "systemctl hibernate",
-                },
+                format!("{session_manager} hibernate"),
                 false,
             ),
             Item::new(
