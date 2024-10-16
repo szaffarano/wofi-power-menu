@@ -11,15 +11,10 @@ use wofi_power_menu::{
 fn main() -> Result<()> {
     let args = power_menu::CliArgs::parse();
 
-    let session_manager = match args.elogind {
-        Some(s) => {
-            if s {
-                SessionManager::Elogind
-            } else {
-                SessionManager::Systemd
-            }
-        }
-        None => SessionManager::Systemd,
+    let session_manager = if args.elogind {
+        SessionManager::Elogind
+    } else {
+        SessionManager::Systemd
     };
 
     let mut menu = power_menu::default_menu(session_manager);

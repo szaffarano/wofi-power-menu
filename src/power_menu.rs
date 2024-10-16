@@ -36,7 +36,7 @@ pub struct CliArgs {
 
     /// Switch to elogind
     #[arg(short, long, default_value = "false")]
-    pub elogind: Option<bool>,
+    pub elogind: bool,
 }
 
 pub enum SessionManager {
