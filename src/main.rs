@@ -3,14 +3,21 @@ use std::process::exit;
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use wofi_power_menu::{
-    power_menu, utils,
+    power_menu::{self, SessionManager},
+    utils,
     wofi::{self, Menu},
 };
 
 fn main() -> Result<()> {
     let args = power_menu::CliArgs::parse();
 
-    let mut menu = power_menu::default_menu();
+    let session_manager = if args.elogind {
+        SessionManager::Elogind
+    } else {
+        SessionManager::Systemd
+    };
+
+    let mut menu = power_menu::default_menu(session_manager);
     let mut wofi = power_menu::default_wofi();
 
     power_menu::merge_config(
