@@ -35,28 +35,29 @@ pub struct CliArgs {
     pub list_items: bool,
 
     /// Switch to elogind
-    #[arg(short, long, default_value = "false")]
-    pub elogind: bool,
+    #[arg(short, long)]
+    pub session_manager: SessionManager,
 }
 
-// this should probably be somewhere else
+#[derive(clap::ValueEnum, Debug, Clone, Default)]
 pub enum SessionManager {
-    Elogind,
+    #[default]
     Systemd,
+    Elogind,
 }
 
-impl std::fmt::Display for SessionManager {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let string = match self {
-            SessionManager::Elogind => "loginctl",
-            SessionManager::Systemd => "systemd",
-        };
-
-        write!(f, "{string}")
+impl<'a> Into<&'a str> for SessionManager {
+    fn into(self) -> &'a str {
+        match self {
+            Self::Systemd => "systemd",
+            Self::Elogind => "elogind",
+        }
     }
 }
 
 pub fn default_menu(session_manager: SessionManager) -> Menu {
+    let session_manager: &str = session_manager.into();
+
     Menu::new(
         String::from("Power menu"),
         vec![
