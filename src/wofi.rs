@@ -9,7 +9,7 @@ use std::{
     process::Stdio,
 };
 
-use crate::icons::{CANCEL, FSI, LRM, PDI};
+use crate::icons::{CANCEL, FSI, LRI, LRM, PDI};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
@@ -233,7 +233,7 @@ impl Item {
         for (key, value) in other {
             match key.as_str() {
                 "title" => self.title = value,
-                "icon" => self.icon = value.chars().next().ok_or(anyhow!("failed to get stdin"))?,
+                "icon" => self.icon = value.chars().next().unwrap_or(LRI),
                 "cmd" => self.cmd = value,
                 "requires_confirmation" => self.requires_confirmation = value.parse()?,
                 "enabled" => self.enabled = value.parse()?,
