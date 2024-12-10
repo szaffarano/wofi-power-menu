@@ -56,7 +56,7 @@ impl Display for SessionManager {
     }
 }
 
-impl<'a> From<SessionManager> for &'a str {
+impl From<SessionManager> for &str {
     fn from(val: SessionManager) -> Self {
         match val {
             SessionManager::Systemd => "systemd",
