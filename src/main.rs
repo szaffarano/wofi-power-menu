@@ -3,14 +3,17 @@ use std::process::exit;
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use wofi_power_menu::{
-    power_menu, utils,
+    power_menu::{self},
+    utils,
     wofi::{self, Menu},
 };
 
 fn main() -> Result<()> {
     let args = power_menu::CliArgs::parse();
 
-    let mut menu = power_menu::default_menu();
+    let session_manager = &args.session_manager;
+
+    let mut menu = power_menu::default_menu(session_manager.clone());
     let mut wofi = power_menu::default_wofi();
 
     power_menu::merge_config(

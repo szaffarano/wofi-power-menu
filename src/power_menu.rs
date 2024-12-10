@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::Result;
 use clap::Parser;
 
@@ -33,9 +35,39 @@ pub struct CliArgs {
     /// Show the menu items and exit
     #[arg(short, long)]
     pub list_items: bool,
+
+    /// Switch to elogind
+    #[arg(short, long, default_value_t = SessionManager::Systemd)]
+    pub session_manager: SessionManager,
 }
 
-pub fn default_menu() -> Menu {
+#[derive(clap::ValueEnum, Clone, Debug)]
+pub enum SessionManager {
+    Systemd,
+    Elogind,
+}
+
+impl Display for SessionManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            SessionManager::Systemd => write!(f, "systemd"),
+            SessionManager::Elogind => write!(f, "elogind"),
+        }
+    }
+}
+
+impl From<SessionManager> for &str {
+    fn from(val: SessionManager) -> Self {
+        match val {
+            SessionManager::Systemd => "systemd",
+            SessionManager::Elogind => "elogind",
+        }
+    }
+}
+
+pub fn default_menu(session_manager: SessionManager) -> Menu {
+    let session_manager: &str = session_manager.into();
+
     Menu::new(
         String::from("Power menu"),
         vec![
@@ -43,7 +75,7 @@ pub fn default_menu() -> Menu {
                 "shutdown",
                 "Shut down",
                 icons::SHUTDOWN,
-                "systemctl poweroff",
+                format!("{session_manager} poweroff"),
                 true,
             ),
             Item::new("reboot", "Reboot", icons::REBOOT, "systemctl reboot", true),
@@ -51,14 +83,14 @@ pub fn default_menu() -> Menu {
                 "suspend",
                 "Suspend",
                 icons::SUSPEND,
-                "systemctl suspend",
+                format!("{session_manager} suspend"),
                 true,
             ),
             Item::new(
                 "hibernate",
                 "Hibernate",
                 icons::HIBERNATE,
-                "systemctl hibernate",
+                format!("{session_manager} hibernate"),
                 false,
             ),
             Item::new(
