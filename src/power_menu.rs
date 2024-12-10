@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use anyhow::Result;
 use clap::Parser;
 
@@ -35,22 +37,30 @@ pub struct CliArgs {
     pub list_items: bool,
 
     /// Switch to elogind
-    #[arg(short, long)]
+    #[arg(short, long, default_value_t = SessionManager::Systemd)]
     pub session_manager: SessionManager,
 }
 
-#[derive(clap::ValueEnum, Debug, Clone, Default)]
+#[derive(clap::ValueEnum, Clone, Debug)]
 pub enum SessionManager {
-    #[default]
     Systemd,
     Elogind,
 }
 
-impl<'a> Into<&'a str> for SessionManager {
-    fn into(self) -> &'a str {
+impl Display for SessionManager {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::Systemd => "systemd",
-            Self::Elogind => "elogind",
+            SessionManager::Systemd => write!(f, "systemd"),
+            SessionManager::Elogind => write!(f, "elogind"),
+        }
+    }
+}
+
+impl<'a> From<SessionManager> for &'a str {
+    fn from(val: SessionManager) -> Self {
+        match val {
+            SessionManager::Systemd => "systemd",
+            SessionManager::Elogind => "elogind",
         }
     }
 }

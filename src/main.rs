@@ -3,7 +3,7 @@ use std::process::exit;
 use anyhow::{anyhow, Result};
 use clap::Parser;
 use wofi_power_menu::{
-    power_menu::{self, SessionManager},
+    power_menu::{self},
     utils,
     wofi::{self, Menu},
 };
@@ -11,13 +11,9 @@ use wofi_power_menu::{
 fn main() -> Result<()> {
     let args = power_menu::CliArgs::parse();
 
-    let session_manager = if args.elogind {
-        SessionManager::Elogind
-    } else {
-        SessionManager::Systemd
-    };
+    let session_manager = &args.session_manager;
 
-    let mut menu = power_menu::default_menu(session_manager);
+    let mut menu = power_menu::default_menu(session_manager.clone());
     let mut wofi = power_menu::default_wofi();
 
     power_menu::merge_config(
