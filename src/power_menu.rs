@@ -47,27 +47,42 @@ pub enum SessionManager {
     Elogind,
 }
 
+pub enum Action {
+    Shutdown,
+    Reboot,
+    Suspend,
+    Hibernate,
+    Logout,
+    LockScreen,
+}
+
 impl Display for SessionManager {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SessionManager::Systemd => write!(f, "systemd"),
-            SessionManager::Elogind => write!(f, "elogind"),
-        }
+        write!(f, "{}", format!("{:?}", self).to_lowercase())
     }
 }
 
-impl From<SessionManager> for &str {
-    fn from(val: SessionManager) -> Self {
-        match val {
-            SessionManager::Systemd => "systemd",
-            SessionManager::Elogind => "elogind",
+impl SessionManager {
+    fn execute(&self, action: Action) -> String {
+        let cmd = self.command();
+        match action {
+            Action::Shutdown => format!("{cmd} poweroff"),
+            Action::Reboot => format!("{cmd} reboot"),
+            Action::Suspend => format!("{cmd} suspend"),
+            Action::Hibernate => format!("{cmd} hibernate"),
+            Action::Logout => "loginctl terminate-session".to_string(),
+            Action::LockScreen => "loginctl lock-session".to_string(),
+        }
+    }
+    fn command(&self) -> String {
+        match self {
+            SessionManager::Systemd => "systemctl".to_string(),
+            SessionManager::Elogind => "elogind".to_string(),
         }
     }
 }
 
 pub fn default_menu(session_manager: SessionManager) -> Menu {
-    let session_manager: &str = session_manager.into();
-
     Menu::new(
         String::from("Power menu"),
         vec![
@@ -75,36 +90,42 @@ pub fn default_menu(session_manager: SessionManager) -> Menu {
                 "shutdown",
                 "Shut down",
                 icons::SHUTDOWN,
-                format!("{session_manager} poweroff"),
+                session_manager.execute(Action::Shutdown),
                 true,
             ),
-            Item::new("reboot", "Reboot", icons::REBOOT, "systemctl reboot", true),
+            Item::new(
+                "reboot",
+                "Reboot",
+                icons::REBOOT,
+                session_manager.execute(Action::Reboot),
+                true,
+            ),
             Item::new(
                 "suspend",
                 "Suspend",
                 icons::SUSPEND,
-                format!("{session_manager} suspend"),
+                session_manager.execute(Action::Suspend),
                 true,
             ),
             Item::new(
                 "hibernate",
                 "Hibernate",
                 icons::HIBERNATE,
-                format!("{session_manager} hibernate"),
+                session_manager.execute(Action::Hibernate),
                 false,
             ),
             Item::new(
                 "logout",
                 "Logout",
                 icons::LOGOUT,
-                "loginctl terminate-session",
+                session_manager.execute(Action::Logout),
                 false,
             ),
             Item::new(
                 "lock-screen",
                 "Lock screen",
                 icons::LOCK_SCREEN,
-                "loginctl lock-session",
+                session_manager.execute(Action::LockScreen),
                 false,
             ),
         ],
