@@ -5,8 +5,9 @@ use std::{
     fmt::Display,
     fs,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process::Stdio,
+    str::FromStr,
 };
 
 use crate::icons::{CANCEL, FSI, LRI, LRM, PDI};
@@ -340,13 +341,20 @@ impl Wofi {
     }
 }
 
-pub fn get_config(file_name: impl Into<String>) -> anyhow::Result<Option<Config>> {
-    let base_dirs =
-        directories_next::BaseDirs::new().ok_or_else(|| anyhow!("Error reading config"))?;
-
-    let path = base_dirs
-        .config_dir()
-        .join(format!("{}.toml", file_name.into()));
+pub fn get_config(
+    file_name: impl Into<String>,
+    config_path: &Option<String>,
+) -> anyhow::Result<Option<Config>> {
+    
+    let path = match config_path {
+        // If --config <CONFIG> was passed, use the specified toml config file
+        Some(path) => PathBuf::from_str(&path)?,
+        // Else default to $HOME/.config/wofi-power-menu.toml
+        None => directories_next::BaseDirs::new()
+            .ok_or_else(|| anyhow!("Error reading config"))?
+            .config_dir()
+            .join(format!("{}.toml", file_name.into())),
+    };
 
     Config::read(path)
 }

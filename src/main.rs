@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     power_menu::merge_config(
         &mut menu,
         &mut wofi,
-        wofi::get_config(env!("CARGO_BIN_NAME"))?,
+        wofi::get_config(env!("CARGO_BIN_NAME"), &args.config)?,
     )?;
     power_menu::merge_cli_args(&mut menu, &mut wofi, &args)?;
 
