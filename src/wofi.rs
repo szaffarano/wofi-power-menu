@@ -345,7 +345,6 @@ pub fn get_config(
     file_name: impl Into<String>,
     config_path: &Option<String>,
 ) -> anyhow::Result<Option<Config>> {
-    
     let path = match config_path {
         // If --config <CONFIG> was passed, use the specified toml config file
         Some(path) => PathBuf::from_str(&path)?,

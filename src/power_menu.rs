@@ -147,7 +147,6 @@ pub fn merge_config(menu: &mut Menu, wofi: &mut Wofi, config: Option<Config>) ->
         }
 
         if let Some(menu_config) = config.menu {
-            // dbg!(&menu);
             menu.merge(menu_config)?;
         }
     } else {
