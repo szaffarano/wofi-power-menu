@@ -36,6 +36,10 @@ pub struct CliArgs {
     #[arg(short, long)]
     pub list_items: bool,
 
+    /// Path for config file (Must be formatted as a .toml file)
+    #[arg(long)]
+    pub config: Option<String>,
+
     /// Switch to elogind
     #[arg(short, long, default_value_t = SessionManager::Systemd)]
     pub session_manager: SessionManager,
