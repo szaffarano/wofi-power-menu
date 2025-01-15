@@ -347,7 +347,7 @@ pub fn get_config(
 ) -> anyhow::Result<Option<Config>> {
     let path = match config_path {
         // If --config <CONFIG> was passed, use the specified toml config file
-        Some(path) => PathBuf::from_str(&path)?,
+        Some(path) => PathBuf::from_str(path)?,
         // Else default to $HOME/.config/wofi-power-menu.toml
         None => directories_next::BaseDirs::new()
             .ok_or_else(|| anyhow!("Error reading config"))?
