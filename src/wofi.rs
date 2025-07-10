@@ -129,7 +129,7 @@ impl Menu {
         Ok(())
     }
 
-    pub fn iter(&self) -> MenuIterator {
+    pub fn iter(&self) -> MenuIterator<'_> {
         MenuIterator {
             curr: 0,
             menu: self,
@@ -199,7 +199,7 @@ impl Item {
         config
             .iter()
             .filter(|(k, _)| !attributes.contains(&k.as_str()))
-            .for_each(|(k, _)| println!("[WARNING] {}: invalid property declared in '{}'", k, id));
+            .for_each(|(k, _)| println!("[WARNING] {k}: invalid property declared in '{id}'"));
 
         Ok(Item {
             id,
