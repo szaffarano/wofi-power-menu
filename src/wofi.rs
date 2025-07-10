@@ -284,6 +284,7 @@ impl Wofi {
             .args(self.args.split_whitespace().collect::<Vec<_>>())
             // mandatory arguments
             .arg("-Ddmenu-print_line_num=true")
+            .arg("-i")
             .arg("--dmenu")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
