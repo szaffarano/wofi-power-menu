@@ -41,7 +41,7 @@
           inherit system overlays;
         };
 
-        rustNightly = pkgsWithOverlay.rust-bin.nightly.latest.default.override {
+        rustToolchain = pkgsWithOverlay.rust-bin.nightly.latest.default.override {
           extensions = [
             "rust-src"
             "rust-analyzer"
@@ -52,14 +52,17 @@
           default = self'.packages.wofi-power-menu;
           wofi-power-menu = pkgsWithOverlay.rustPlatform.buildRustPackage {
             pname = "wofi-power-menu";
-            version = "0.2.6";
+            version = let
+              cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+            in
+              cargoToml.package.version;
 
             src = pkgs.lib.cleanSource ./.;
             cargoLock = {
               lockFile = ./Cargo.lock;
             };
 
-            nativeBuildInputs = [rustNightly];
+            nativeBuildInputs = [rustToolchain];
 
             meta = with pkgs.lib; {
               description = "Highly configurable power menu using the wofi launcher";
@@ -118,7 +121,7 @@
             inputsFrom = [self'.packages.wofi-power-menu];
             inherit (self'.checks) pre-commit;
             packages = with pkgsWithOverlay; [
-              rustNightly
+              rustToolchain
               cargo-bloat
               cargo-edit
               cargo-outdated
