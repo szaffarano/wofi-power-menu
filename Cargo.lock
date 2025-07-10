@@ -780,7 +780,7 @@ checksum = "c06928c8748d81b05c9be96aad92e1b6ff01833332f281e8cfca3be4b35fc9ec"
 
 [[package]]
 name = "wofi-power-menu"
-version = "0.2.6"
+version = "0.2.9"
 dependencies = [
  "anyhow",
  "assert_cmd",

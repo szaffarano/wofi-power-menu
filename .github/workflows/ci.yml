@@ -1,5 +1,4 @@
 name: CI pipeline
-
 on:
   pull_request:
   push:
@@ -7,10 +6,8 @@ on:
       - "master"
     tags-ignore:
       - "*"
-
 env:
   CARGO_TERM_COLOR: always
-
 jobs:
   cancel_previous:
     runs-on: ubuntu-latest
@@ -19,7 +16,6 @@ jobs:
         uses: styfle/cancel-workflow-action@0.12.1
         with:
           access_token: ${{ github.token }}
-
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -51,10 +47,8 @@ jobs:
         shell: bash
         run: |
           cargo clippy --features=${{ matrix.features }} --locked --tests -- -D warnings
-
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust Toolchain
@@ -78,7 +72,6 @@ jobs:
         shell: bash
         run: |
           cargo test --release
-
   build:
     runs-on: ubuntu-latest
     steps:
