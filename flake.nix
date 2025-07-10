@@ -84,7 +84,6 @@
           projectRootFile = "flake.nix";
           programs = {
             alejandra.enable = true;
-            rustfmt.enable = true;
             deadnix.enable = true;
             statix.enable = true;
             jsonfmt.enable = true;
@@ -96,11 +95,12 @@
           settings = {
             on-unmatched = "info";
             excludes = [
+              "Cargo.toml"
               "*.conf"
               "*.css"
-              "*.pub"
               "flake.lock"
               "*.ini"
+              "*.pub"
             ];
           };
           settings.formatter.shfmt = {
