@@ -8,10 +8,7 @@ pub fn run(cmd: String, dry_run: bool) -> Result<()> {
         let args = cmd.collect::<Vec<&str>>();
 
         let dry = if dry_run { " (dry run)" } else { "" };
-        println!(
-            "About to execute: '{}' with args {:?} {}",
-            cmd_name, args, dry
-        );
+        println!("About to execute: '{cmd_name}' with args {args:?} {dry}");
 
         if !dry_run {
             let result = Command::new(cmd_name).args(args).output()?;

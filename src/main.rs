@@ -27,7 +27,7 @@ fn main() -> Result<()> {
         println!("Available items:");
         println!("----------------");
         for item in menu.iter() {
-            println!("{}", item);
+            println!("{item}");
         }
         exit(0);
     }
