@@ -8,6 +8,78 @@
 
 Implements a power menu using the [wofi](https://sr.ht/~scoopta/wofi/) launcher.
 
+## Installation
+
+### Nix
+
+#### Option 1: Using flakes (recommended)
+
+If you have flakes enabled:
+
+```bash
+# Install directly
+nix profile install github:szaffarano/wofi-power-menu
+
+# Or run without installing
+nix run github:szaffarano/wofi-power-menu
+```
+
+#### Option 2: Add to your NixOS configuration
+
+Add to your `configuration.nix`:
+
+```nix
+{
+  inputs.wofi-power-menu.url = "github:szaffarano/wofi-power-menu";
+  
+  outputs = { nixpkgs, wofi-power-menu, ... }: {
+    # Your existing config...
+    
+    environment.systemPackages = with pkgs; [
+      # Your other packages...
+      wofi-power-menu.packages.${system}.default
+    ];
+  };
+}
+```
+
+### Arch Linux
+
+You can install this project using an [unofficial AUR package](https://aur.archlinux.org/packages/wofi-power-menu) (Thanks [@AsfhtgkDavid](https://github.com/AsfhtgkDavid)):
+
+```bash
+yay -S wofi-power-menu
+```
+
+Alternatively, you can build from the AUR manually:
+
+```bash
+git clone https://aur.archlinux.org/wofi-power-menu.git
+cd wofi-power-menu
+makepkg -si
+```
+
+### Build from Source
+
+If your distribution isn't listed above, you can build from source:
+
+```bash
+# Install Rust (if not already installed)
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source $HOME/.cargo/env
+
+# Clone the repository
+git clone https://github.com/szaffarano/wofi-power-menu.git
+cd wofi-power-menu
+
+# Build and install
+cargo install --path .
+```
+
+Requirements:
+- Rust 1.70 or newer
+- [wofi](https://sr.ht/~scoopta/wofi/) installed on your system
+
 ## Usage
 
 Just run the program to show the power menu:
