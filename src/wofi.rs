@@ -89,6 +89,16 @@ impl Menu {
             .join("\n")
     }
 
+    pub fn max_width(&self) -> usize {
+        self.items
+            .iter()
+            .filter(|i| i.enabled)
+            .map(|i| i.render())
+            .map(|s| s.len())
+            .max()
+            .unwrap_or(0)
+    }
+
     pub fn nth(&self, n: usize) -> Option<&Item> {
         self.items
             .iter()
@@ -273,13 +283,13 @@ impl Wofi {
             dry_run: false,
         }
     }
-
     pub fn spawn(&self, menu: &Menu) -> Result<String> {
         let mut child = std::process::Command::new(&self.path)
             // both prompt and lines can be overridden by self.args
             .arg("--prompt")
             .arg(&menu.title)
-            .arg(format!("--lines={}", menu.size() + 1))
+            .arg(format!("-H {}", (menu.size() + 1) * 30))
+            .arg(format!("-W {}", (menu.max_width())))
             // default/configured args
             .args(self.args.split_whitespace().collect::<Vec<_>>())
             // mandatory arguments

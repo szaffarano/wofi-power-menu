@@ -133,6 +133,7 @@
               curl
               git
               jq
+              wofi
             ];
 
             env = {
