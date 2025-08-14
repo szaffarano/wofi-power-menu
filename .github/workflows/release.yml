@@ -15,7 +15,7 @@ jobs:
       release_id: ${{ steps.create_release.outputs.id }}
       is_pre: ${{ steps.release_type.outputs.is_pre }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Conventional Commit Changelog
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Rust Toolchain
         id: rust_toolchain
         uses: dtolnay/rust-toolchain@master
@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Rust Toolchain
         id: rust_toolchain
         uses: dtolnay/rust-toolchain@master
@@ -113,7 +113,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: create_release
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install Rust Toolchain
         id: rust_toolchain
         uses: dtolnay/rust-toolchain@master
