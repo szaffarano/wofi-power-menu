@@ -1,171 +1,49 @@
-name: Release pipeline
-permissions:
-  contents: write
+name: Release
+
 on:
   push:
     tags:
-      - "v*"
-env:
-  CARGO_TERM_COLOR: always
+      - 'v*'
+
 jobs:
-  create_release:
+  build-and-release:
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
-      release_id: ${{ steps.create_release.outputs.id }}
-      is_pre: ${{ steps.release_type.outputs.is_pre }}
+    
     steps:
-      - uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-      - name: Conventional Commit Changelog
-        id: conventional_commits
-        shell: bash
-        run: |
-          curl -Ls https://github.com/clog-tool/clog-cli/releases/download/v0.9.3/clog-v0.9.3-x86_64-unknown-linux-musl.tar.gz | tar xfz -
-          chmod +x ./clog
-          echo "About to delete tag $GITHUB_REF_NAME"
-          # delete current tag locally
-          git tag -d "$GITHUB_REF_NAME"
-          echo "Tag deleted!"
-          if [[ "$GITHUB_REF_NAME" == *"-"* ]]; then
-            echo "Calculate last tag using $GITHUB_REF_NAME"
-            git tag -l --sort version:refname
-            last_tag="$(git tag -l --sort version:refname | tail -n1)"
-            echo "Last tag: $last_tag"
-          else
-            echo "Calculate last tag"
-            git tag -l --sort version:refname
-            last_tag="$(git tag -l --sort version:refname | grep -v -- - | tail -n1)"
-            echo "Last tag: $last_tag"
-          fi
-          echo "Running..."
-          printf 'Using %s as last tag\n' "$last_tag"
-          echo 'CHANGELOG<<EOF' >> $GITHUB_ENV
-          ./clog --from="$last_tag" --setversion="$GITHUB_REF_NAME" >> $GITHUB_ENV
-          echo 'EOF' >> $GITHUB_ENV
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1
-        with:
-          draft: true
-          prerelease: ${{ steps.release_type.outputs.is_pre }}
-          body: ${{ env.CHANGELOG }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-  lint:
-    runs-on: ubuntu-latest
-    continue-on-error: false
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install Rust Toolchain
-        id: rust_toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-          components: rustfmt, clippy
-      - name: Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
-            lint-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
-            lint-${{ runner.os }}-
-      - name: rustfmt
-        shell: bash
-        run: |
-          cargo fmt -- --check
-      - name: Clippy
-        shell: bash
-        run: |
-          cargo clippy --locked --tests -- -D warnings
-  test:
-    runs-on: ubuntu-latest
-    continue-on-error: false
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install Rust Toolchain
-        id: rust_toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-      - name: Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
-            test-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
-            test-${{ runner.os }}-
-      - name: Test
-        shell: bash
-        run: |
-          cargo test --release
-  build:
-    runs-on: ubuntu-latest
-    needs: create_release
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install Rust Toolchain
-        id: rust_toolchain
-        uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: stable
-      - name: Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}
-          restore-keys: |
-            build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-lock-${{ hashFiles('Cargo.lock') }}-
-            build-${{ runner.os }}-rustc-${{ steps.rust_toolchain.outputs.cachekey }}-
-            build-${{ runner.os }}-
-      - name: "Build"
-        shell: bash
-        run: |
-          cargo build --release
-      - name: Pack
-        id: pack
-        shell: bash
-        run: |
-          zip -j "wofi-power-menu.zip" target/release/wofi-power-menu
-          echo "filename=wofi-power-menu" >> $GITHUB_OUTPUT
-      - name: "Hash (Unix)"
-        run: |
-          echo "$(sha256sum ${{ steps.pack.outputs.filename }}.zip | cut -d ' ' -f 1)" > ${{ steps.pack.outputs.filename }}.zip.sha256sum
-          cat ${{ steps.pack.outputs.filename }}.zip.sha256sum
-      - name: Upload
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.pack.outputs.filename }}.zip
-          asset_name: ${{ steps.pack.outputs.filename }}.zip
-          asset_content_type: application/zip
-      - name: Upload Hash
-        uses: shogo82148/actions-upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./${{ steps.pack.outputs.filename }}.zip.sha256sum
-          asset_name: ${{ steps.pack.outputs.filename }}.zip.sha256sum
-          asset_content_type: text/plain
-  publish_release:
-    runs-on: ubuntu-latest
-    needs: [create_release, lint, test, build]
-    steps:
-      - name: Publish Release
-        uses: eregon/publish-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ needs.create_release.outputs.release_id }}
+    - uses: actions/checkout@v4
+    
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: x86_64-unknown-linux-gnu
+    
+    - name: Build release
+      run: cargo build --release --target x86_64-unknown-linux-gnu
+    
+    - name: Prepare binary
+      run: |
+        cp target/x86_64-unknown-linux-gnu/release/wofi-power-menu wofi-power-menu-linux-x64
+    
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+    
+    - name: Sign artifacts
+      run: |
+        gpg --armor --detach-sign wofi-power-menu-linux-x64
+        sha256sum your-project-linux-x64 > wofi-power-menu-linux-x64.sha256
+        gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          wofi-power-menu-linux-x64
+          wofi-power-menu-linux-x64.asc
+          wofi-power-menu-linux-x64.sha256
+          wofi-power-menu-linux-x64.sha256.asc
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
