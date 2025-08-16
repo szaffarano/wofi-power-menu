@@ -39,7 +39,7 @@ jobs:
         gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
     
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       with:
         files: |
           wofi-power-menu-linux-x64
