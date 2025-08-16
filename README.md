@@ -45,7 +45,9 @@ Add to your `configuration.nix`:
 
 ### Arch Linux
 
-You can install this project using an [unofficial AUR package](https://aur.archlinux.org/packages/wofi-power-menu) (Thanks [@AsfhtgkDavid](https://github.com/AsfhtgkDavid)):
+You can install this project using an [unofficial AUR
+package](https://aur.archlinux.org/packages/wofi-power-menu) (Thanks
+[@AsfhtgkDavid](https://github.com/AsfhtgkDavid)):
 
 ```bash
 yay -S wofi-power-menu
@@ -58,6 +60,52 @@ git clone https://aur.archlinux.org/wofi-power-menu.git
 cd wofi-power-menu
 makepkg -si
 ```
+
+### Download Pre-built Binary
+
+You can download the latest pre-built binary from the [GitHub releases page](https://github.com/szaffarano/wofi-power-menu/releases):
+
+1. **Download the binary and verification files:**
+
+   ```bash
+   # Download the binary
+   curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64
+   
+   # Download verification files
+   curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.asc
+   curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.sha256
+   curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.sha256.asc
+   ```
+
+2. **Import the PGP public key:**
+
+   ```bash
+   # Download and import the public key
+   curl -LO https://github.com/szaffarano/wofi-power-menu/raw/master/KEYS
+   gpg --import KEYS
+   ```
+
+3. **Verify the signature:**
+
+   ```bash
+   # Verify the signed checksum
+   gpg --verify wofi-power-menu-linux-x64.sha256.asc wofi-power-menu-linux-x64.sha256
+   
+   # Verify the binary checksum
+   sha256sum -c wofi-power-menu-linux-x64.sha256
+   ```
+
+4. **Install the binary:**
+
+   ```bash
+   # Make executable and move to PATH
+   chmod +x wofi-power-menu-linux-x64
+   sudo mv wofi-power-menu-linux-x64 /usr/local/bin/wofi-power-menu
+   ```
+
+**Note:** All releases are signed with the PGP key
+`42BE68F43D528467FC281E2E310FFE86A2E427BA` (Sebastián Zaffarano
+<sebas@zaffarano.com.ar>).
 
 ### Build from Source
 
