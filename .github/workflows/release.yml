@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    
     steps:
     - uses: actions/checkout@v5
     
@@ -17,6 +18,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
       with:
         targets: x86_64-unknown-linux-gnu
+    
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -27,6 +29,7 @@ jobs:
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-
+    
     - name: Cache target directory
       uses: actions/cache@v4
       with:
@@ -34,6 +37,7 @@ jobs:
         key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-target-
+    
     - name: Build release
       run: cargo build --release --target x86_64-unknown-linux-gnu
     
@@ -53,14 +57,65 @@ jobs:
         sha256sum wofi-power-menu-linux-x64 > wofi-power-menu-linux-x64.sha256
         gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
     
+    - name: Generate Release Notes
+      id: release_notes
+      uses: mikepenz/release-changelog-builder-action@v4
+      with:
+        configuration: |
+          {
+            "categories": [
+              {
+                "title": "## 🛠 Breaking Changes",
+                "labels": [],
+                "rules": [{"pattern": "^(feat|fix|perf|refactor)(!:|\\(.+\\)!:)", "flags": "gu"}]
+              },
+              {
+                "title": "## 🎉 Features",
+                "labels": [],
+                "rules": [{"pattern": "^feat(\\(.+\\))?: ", "flags": "gu"}]
+              },
+              {
+                "title": "## 🐛 Bug Fixes",
+                "labels": [],
+                "rules": [{"pattern": "^fix(\\(.+\\))?: ", "flags": "gu"}]
+              },
+              {
+                "title": "## ⚡ Performance",
+                "labels": [],
+                "rules": [{"pattern": "^perf(\\(.+\\))?: ", "flags": "gu"}]
+              },
+              {
+                "title": "## 📚 Documentation",
+                "labels": [],
+                "rules": [{"pattern": "^docs(\\(.+\\))?: ", "flags": "gu"}]
+              },
+              {
+                "title": "## 🧹 Maintenance",
+                "labels": [],
+                "rules": [{"pattern": "^(chore|refactor)(\\(.+\\))?: ", "flags": "gu"}]
+              }
+            ],
+            "template": "#{{CHANGELOG}}",
+            "pr_template": "- #{{TITLE}} (##{{NUMBER}})",
+            "empty_template": "- No changes",
+            "transformers": [
+              {
+                "pattern": "^(feat|fix|perf|docs|chore|refactor)(\\(.+\\))?!?: ",
+                "target": ""
+              }
+            ]
+          }
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
     - name: Create Release
       uses: softprops/action-gh-release@v2
       with:
+        body: ${{ steps.release_notes.outputs.changelog }}
         files: |
           wofi-power-menu-linux-x64
           wofi-power-menu-linux-x64.asc
           wofi-power-menu-linux-x64.sha256
           wofi-power-menu-linux-x64.sha256.asc
-        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
