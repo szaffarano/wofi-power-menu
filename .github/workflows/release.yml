@@ -63,45 +63,26 @@ jobs:
       with:
         configuration: |
           {
+            "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>#{{CONTRIBUTORS}}",
             "categories": [
               {
-                "title": "## 🛠 Breaking Changes",
-                "labels": [],
-                "rules": [{"pattern": "^(feat|fix|perf|refactor)(!:|\\(.+\\)!:)", "flags": "gu"}]
+                  "title": "## Feature",
+                  "labels": ["feat", "feature"]
               },
               {
-                "title": "## 🎉 Features",
-                "labels": [],
-                "rules": [{"pattern": "^feat(\\(.+\\))?: ", "flags": "gu"}]
+                  "title": "## Fix",
+                  "labels": ["fix", "bug"]
               },
               {
-                "title": "## 🐛 Bug Fixes",
-                "labels": [],
-                "rules": [{"pattern": "^fix(\\(.+\\))?: ", "flags": "gu"}]
-              },
-              {
-                "title": "## ⚡ Performance",
-                "labels": [],
-                "rules": [{"pattern": "^perf(\\(.+\\))?: ", "flags": "gu"}]
-              },
-              {
-                "title": "## 📚 Documentation",
-                "labels": [],
-                "rules": [{"pattern": "^docs(\\(.+\\))?: ", "flags": "gu"}]
-              },
-              {
-                "title": "## 🧹 Maintenance",
-                "labels": [],
-                "rules": [{"pattern": "^(chore|refactor)(\\(.+\\))?: ", "flags": "gu"}]
+                  "title": "## Other",
+                  "labels": []
               }
             ],
-            "template": "#{{CHANGELOG}}",
-            "pr_template": "- #{{TITLE}} (##{{NUMBER}})",
-            "empty_template": "- No changes",
-            "transformers": [
+            "label_extractor": [
               {
-                "pattern": "^(feat|fix|perf|docs|chore|refactor)(\\(.+\\))?!?: ",
-                "target": ""
+                "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
+                "on_property": "title",
+                "target": "$1"
               }
             ]
           }
