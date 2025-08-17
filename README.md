@@ -45,6 +45,8 @@ Add to your `configuration.nix`:
 
 ### Arch Linux
 
+#### From sources
+
 You can install this project using an [unofficial AUR
 package](https://aur.archlinux.org/packages/wofi-power-menu) (Thanks
 [@AsfhtgkDavid](https://github.com/AsfhtgkDavid)):
@@ -59,6 +61,28 @@ Alternatively, you can build from the AUR manually:
 git clone https://aur.archlinux.org/wofi-power-menu.git
 cd wofi-power-menu
 makepkg -si
+```
+
+#### Prebuilt
+
+If you don't want to spend time building it, you can download the prebuilt version:
+
+```bash
+yay -S wofi-power-menu-bin
+```
+
+Alternatively, you can install from the AUR manually:
+
+```bash
+git clone https://aur.archlinux.org/wofi-power-menu-bin.git
+cd wofi-power-menu-bin
+makepkg -si
+```
+
+You may need to download GPG keys:
+
+```bash
+gpg --recv-keys 42BE68F43D528467FC281E2E310FFE86A2E427BA
 ```
 
 ### Download Pre-built Binary
@@ -81,8 +105,7 @@ You can download the latest pre-built binary from the [GitHub releases page](htt
 
    ```bash
    # Download and import the public key
-   curl -LO https://github.com/szaffarano/wofi-power-menu/raw/master/KEYS
-   gpg --import KEYS
+   gpg --recv-keys 42BE68F43D528467FC281E2E310FFE86A2E427BA
    ```
 
 3. **Verify the signature:**
