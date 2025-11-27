@@ -59,7 +59,7 @@ jobs:
     
     - name: Generate Release Notes
       id: release_notes
-      uses: mikepenz/release-changelog-builder-action@v5
+      uses: mikepenz/release-changelog-builder-action@v6
       with:
         configuration: |
           {
