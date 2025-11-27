@@ -94,31 +94,33 @@ You can download the latest pre-built binary from the [GitHub releases page](htt
    ```bash
    # Download the binary
    curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64
-   
+
+
    # Download verification files
    curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.asc
    curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.sha256
    curl -LO https://github.com/szaffarano/wofi-power-menu/releases/latest/download/wofi-power-menu-linux-x64.sha256.asc
    ```
 
-2. **Import the PGP public key:**
+1. **Import the PGP public key:**
 
    ```bash
    # Download and import the public key
    gpg --recv-keys 42BE68F43D528467FC281E2E310FFE86A2E427BA
    ```
 
-3. **Verify the signature:**
+1. **Verify the signature:**
 
    ```bash
    # Verify the signed checksum
    gpg --verify wofi-power-menu-linux-x64.sha256.asc wofi-power-menu-linux-x64.sha256
-   
+
+
    # Verify the binary checksum
    sha256sum -c wofi-power-menu-linux-x64.sha256
    ```
 
-4. **Install the binary:**
+1. **Install the binary:**
 
    ```bash
    # Make executable and move to PATH
@@ -148,6 +150,7 @@ cargo install --path .
 ```
 
 Requirements:
+
 - Rust 1.70 or newer
 - [wofi](https://sr.ht/~scoopta/wofi/) installed on your system
 
@@ -177,7 +180,7 @@ Options:
   -V, --version                Print version
 ```
 
-example
+Example
 
 ```bash
 # list items

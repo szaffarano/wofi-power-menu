@@ -1,102 +1,90 @@
 name: Release
-
 on:
   push:
     tags:
-      - 'v*'
-
+      - "v*"
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
     steps:
-    - uses: actions/checkout@v6
-    
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: x86_64-unknown-linux-gnu
-    
-    - name: Cache cargo registry
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry/index/
-          ~/.cargo/registry/cache/
-          ~/.cargo/git/db/
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
-    
-    - name: Cache target directory
-      uses: actions/cache@v4
-      with:
-        path: target/
-        key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-target-
-    
-    - name: Build release
-      run: cargo build --release --target x86_64-unknown-linux-gnu
-    
-    - name: Prepare binary
-      run: |
-        cp target/x86_64-unknown-linux-gnu/release/wofi-power-menu wofi-power-menu-linux-x64
-    
-    - name: Import GPG key
-      uses: crazy-max/ghaction-import-gpg@v6
-      with:
-        gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-        passphrase: ${{ secrets.GPG_PASSPHRASE }}
-    
-    - name: Sign artifacts
-      run: |
-        gpg --armor --detach-sign wofi-power-menu-linux-x64
-        sha256sum wofi-power-menu-linux-x64 > wofi-power-menu-linux-x64.sha256
-        gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
-    
-    - name: Generate Release Notes
-      id: release_notes
-      uses: mikepenz/release-changelog-builder-action@v6
-      with:
-        configuration: |
-          {
-            "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>#{{CONTRIBUTORS}}",
-            "categories": [
-              {
-                  "title": "## Feature",
-                  "labels": ["feat", "feature"]
-              },
-              {
-                  "title": "## Fix",
-                  "labels": ["fix", "bug"]
-              },
-              {
-                  "title": "## Other",
-                  "labels": []
-              }
-            ],
-            "label_extractor": [
-              {
-                "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
-                "on_property": "title",
-                "target": "$1"
-              }
-            ]
-          }
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    - name: Create Release
-      uses: softprops/action-gh-release@v2
-      with:
-        body: ${{ steps.release_notes.outputs.changelog }}
-        files: |
-          wofi-power-menu-linux-x64
-          wofi-power-menu-linux-x64.asc
-          wofi-power-menu-linux-x64.sha256
-          wofi-power-menu-linux-x64.sha256.asc
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v6
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-gnu
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+      - name: Cache target directory
+        uses: actions/cache@v4
+        with:
+          path: target/
+          key: ${{ runner.os }}-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-target-
+      - name: Build release
+        run: cargo build --release --target x86_64-unknown-linux-gnu
+      - name: Prepare binary
+        run: |
+          cp target/x86_64-unknown-linux-gnu/release/wofi-power-menu wofi-power-menu-linux-x64
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Sign artifacts
+        run: |
+          gpg --armor --detach-sign wofi-power-menu-linux-x64
+          sha256sum wofi-power-menu-linux-x64 > wofi-power-menu-linux-x64.sha256
+          gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
+      - name: Generate Release Notes
+        id: release_notes
+        uses: mikepenz/release-changelog-builder-action@v6
+        with:
+          configuration: |
+            {
+              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>#{{CONTRIBUTORS}}",
+              "categories": [
+                {
+                    "title": "## Feature",
+                    "labels": ["feat", "feature"]
+                },
+                {
+                    "title": "## Fix",
+                    "labels": ["fix", "bug"]
+                },
+                {
+                    "title": "## Other",
+                    "labels": []
+                }
+              ],
+              "label_extractor": [
+                {
+                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
+                  "on_property": "title",
+                  "target": "$1"
+                }
+              ]
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body: ${{ steps.release_notes.outputs.changelog }}
+          files: |
+            wofi-power-menu-linux-x64
+            wofi-power-menu-linux-x64.asc
+            wofi-power-menu-linux-x64.sha256
+            wofi-power-menu-linux-x64.sha256.asc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
