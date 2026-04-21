@@ -1,6 +1,6 @@
 [package]
 name = "wofi-power-menu"
-version = "0.3.3"
+version = "0.3.4"
 edition = "2021"
 authors = ["Sebastián Zaffarano sebas@zaffarano.com.ar"]
 license = "MIT"
