@@ -37,7 +37,7 @@ jobs:
         run: |
           cp target/x86_64-unknown-linux-gnu/release/wofi-power-menu wofi-power-menu-linux-x64
       - name: Import GPG key
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.GPG_PASSPHRASE }}
