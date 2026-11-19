@@ -15,3 +15,6 @@ result
 # direnv
 .direnv
 .pre-commit-config.yaml
+
+# git worktrees
+.worktrees/
