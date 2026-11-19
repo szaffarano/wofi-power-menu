@@ -1,8 +1,7 @@
 name: Release
 on:
-  push:
-    tags:
-      - "v*"
+  release:
+    types: [published]
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
@@ -46,41 +45,9 @@ jobs:
           gpg --armor --detach-sign wofi-power-menu-linux-x64
           sha256sum wofi-power-menu-linux-x64 > wofi-power-menu-linux-x64.sha256
           gpg --armor --detach-sign wofi-power-menu-linux-x64.sha256
-      - name: Generate Release Notes
-        id: release_notes
-        uses: mikepenz/release-changelog-builder-action@v6
-        with:
-          configuration: |
-            {
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>#{{CONTRIBUTORS}}",
-              "categories": [
-                {
-                    "title": "## Feature",
-                    "labels": ["feat", "feature"]
-                },
-                {
-                    "title": "## Fix",
-                    "labels": ["fix", "bug"]
-                },
-                {
-                    "title": "## Other",
-                    "labels": []
-                }
-              ],
-              "label_extractor": [
-                {
-                  "pattern": "^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test){1}(\\([\\w\\-\\.]+\\))?(!)?: ([\\w ])+([\\s\\S]*)",
-                  "on_property": "title",
-                  "target": "$1"
-                }
-              ]
-            }
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Release
+      - name: Upload Release Artifacts
         uses: softprops/action-gh-release@v3
         with:
-          body: ${{ steps.release_notes.outputs.changelog }}
           files: |
             wofi-power-menu-linux-x64
             wofi-power-menu-linux-x64.asc
