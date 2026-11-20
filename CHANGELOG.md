@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.8](https://github.com/szaffarano/wofi-power-menu/compare/v0.3.7...v0.3.8) (2026-11-20)
+
+
+### Miscellaneous Chores
+
+* **deps:** update googleapis/release-please-action action to v5 ([#136](https://github.com/szaffarano/wofi-power-menu/issues/136)) ([1d7925b](https://github.com/szaffarano/wofi-power-menu/commit/1d7925be5484a96186cd5174ad4097e7b4786708))
+* **deps:** update rust crate clap to v4.6.9 ([#138](https://github.com/szaffarano/wofi-power-menu/issues/138)) ([bb60064](https://github.com/szaffarano/wofi-power-menu/commit/bb60064ab8a1bc9865072c55df501d49ce6f3e0d))
+* **release:** onboard release-please ([#135](https://github.com/szaffarano/wofi-power-menu/issues/135)) ([873dca4](https://github.com/szaffarano/wofi-power-menu/commit/873dca426d661c11dbb89967e0aece6e9764b705))
+
 ## [0.3.7](https://github.com/szaffarano/wofi-power-menu/compare/v0.3.6...v0.3.7) (2026-11-19)
 
 
@@ -261,4 +270,3 @@
 * Add debug info ([0729aba](https://github.com/szaffarano/wofi-power-menu/commit/0729aba4677702edb413b425bb11976562d7a635))
 
 ## 0.0.1 (2024-03-24)
-
