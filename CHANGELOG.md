@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.9](https://github.com/szaffarano/wofi-power-menu/compare/v0.3.8...v0.3.9) (2026-11-25)
+
+
+### Miscellaneous Chores
+
+* **deps:** update rust crate anyhow to v1.0.105 ([#141](https://github.com/szaffarano/wofi-power-menu/issues/141)) ([edcb543](https://github.com/szaffarano/wofi-power-menu/commit/edcb543f7c37f0ab8f348b64e1537000f952744c))
+* **deps:** update rust crate toml to v1.2.2 ([#139](https://github.com/szaffarano/wofi-power-menu/issues/139)) ([b204dd1](https://github.com/szaffarano/wofi-power-menu/commit/b204dd190e1e555902a0651c8cdfc976a38645b2))
+* **deps:** update rust crate toml to v1.2.3 ([#143](https://github.com/szaffarano/wofi-power-menu/issues/143)) ([06c6686](https://github.com/szaffarano/wofi-power-menu/commit/06c6686da1116b7e94d39d87a38a33be0d6c27d5))
+
 ## [0.3.8](https://github.com/szaffarano/wofi-power-menu/compare/v0.3.7...v0.3.8) (2026-11-20)
 
 
